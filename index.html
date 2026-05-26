@@ -123,9 +123,10 @@
 
 <script>
 const CORRECT_PASSWORD = "BXS2206";
-const API_PROXY = "/api/extract";
+const API_PROXY = "/extract"; // Cloudflare Pages 适配路径
 let currentUrls = [];
 
+// 密码验证
 function checkPassword() {
     const inputPwd = document.getElementById('passwordInput').value.trim();
     if (inputPwd === CORRECT_PASSWORD) {
@@ -136,8 +137,10 @@ function checkPassword() {
     }
 }
 
+// 抖音链接正则
 const DOUYIN_REGEX = /https?:\/\/v\.douyin\.com\/[^\s]+/g;
 
+// 开始提取
 async function startExtract() {
     const inputText = document.getElementById('contentInput').value.trim();
     if (!inputText) return alert('请输入内容');
@@ -168,7 +171,9 @@ async function startExtract() {
     document.getElementById('progressArea').classList.add('hidden');
 }
 
+// 提取单条视频（适配Cloudflare）
 async function extractSingleVideo(url) {
+    // 提交任务（POST请求）
     const submitRes = await fetch(API_PROXY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -179,6 +184,7 @@ async function extractSingleVideo(url) {
 
     const taskId = submitData.data;
 
+    // 轮询查询结果（GET请求）
     for (let t = 0; t < 15; t++) {
         await new Promise(resolve => setTimeout(resolve, 2000));
         const queryRes = await fetch(`${API_PROXY}?taskId=${taskId}`);
@@ -194,6 +200,7 @@ async function extractSingleVideo(url) {
     throw new Error('任务超时');
 }
 
+// 创建结果卡片
 function createResultCard(index, url, status) {
     const card = document.createElement('div');
     card.className = 'glass-card p-5 fade-in';
@@ -211,6 +218,7 @@ function createResultCard(index, url, status) {
     return card;
 }
 
+// 更新结果卡片
 function updateResultCard(card, text, status) {
     const contentDiv = card.querySelector('[id^="card-content-"]');
     if (status === 'success') {
@@ -222,6 +230,7 @@ function updateResultCard(card, text, status) {
     }
 }
 
+// 单条复制
 function copySingleResult(index) {
     const contentDiv = document.getElementById(`card-content-${index+1}`);
     const text = contentDiv.textContent;
@@ -232,6 +241,7 @@ function copySingleResult(index) {
     }
 }
 
+// 重试单条提取
 async function retryExtract(index) {
     const url = currentUrls[index];
     if (!url) return;
@@ -249,6 +259,7 @@ async function retryExtract(index) {
     }
 }
 
+// 复制全部结果
 function copyAllResults() {
     const cards = document.querySelectorAll('[id^="card-content-"]');
     let allText = '';
@@ -266,11 +277,13 @@ function copyAllResults() {
     }
 }
 
+// 清空所有
 function clearAll() {
     document.getElementById('contentInput').value = '';
     document.getElementById('resultArea').innerHTML = '';
 }
 
+// 回车提交密码
 document.getElementById('passwordInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') checkPassword();
 });
