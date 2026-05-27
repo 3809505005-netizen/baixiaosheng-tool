@@ -1,42 +1,70 @@
-const https = require('https');
-
-module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  const API_KEY = process.env.API_KEY;
-  const API_SECRET = process.env.API_SECRET;
-
-  if (!API_KEY || !API_SECRET) {
- https://github.com/3809505005-netizen/baixiaosheng-tool/tree/main   return res.status(500).json({ code: 500, msg: 'API密钥未配置' });
-  }
-
-  const params = req.method === 'POST' ? JSON.parse(req.body || '{}') : req.query;
-  const { url, taskId } = params;
-
+export async function onRequestPost(context) {
   try {
-    if (url) {
-      const response = await fetch(`https://api.anytocopy.com/vip/open-api/v1/video/extract?workUrl=${encodeURIComponent(url)}&taskType=TEXT`, {
-        method: 'POST',
-        headers: { 'X-API-Key': API_KEY, 'X-API-Secret': API_SECRET }
+    const { request, env } = context;
+    const { urls } = await request.json();
+
+    if (!urls || !Array.isArray(urls) || urls.length === 0) {
+      return new Response(JSON.stringify({ error: "请提供有效的视频链接" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
       });
-      const data = await response.json();
-      return res.status(200).json(data);
-    } else if (taskId) {
-      const response = await fetch(`https://api.anytocopy.com/vip/open-api/v1/video/query?taskId=${taskId}`, {
-        headers: { 'X-API-Key': API_KEY, 'X-API-Secret': API_SECRET }
-      });
-      const data = await response.json();
-      return res.status(200).json(data);
-    } else {
-      return res.status(400).json({ code: 400, msg: '缺少参数' });
     }
-  } catch (error) {
-    return res.status(500).json({ code: 500, msg: error.message });
+
+    // 正确的Cloudflare环境变量读取方式
+    const API_KEY = env.API_KEY;
+    const API_SECRET = env.API_SECRET;
+
+    if (!API_KEY || !API_SECRET) {
+      return new Response(JSON.stringify({ error: "API密钥未配置" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const results = [];
+    for (const url of urls) {
+      try {
+        const apiResponse = await fetch("https://api.anytocopy.com/v1/extract", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-API-Key": API_KEY,
+            "X-API-Secret": API_SECRET
+          },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await apiResponse.json();
+        
+        if (data.success && data.data) {
+          results.push({
+            success: true,
+            text: data.data.text || "无文案内容",
+            url
+          });
+        } else {
+          results.push({
+            success: false,
+            error: data.error || "提取失败",
+            url
+          });
+        }
+      } catch (e) {
+        results.push({
+          success: false,
+          error: e.message,
+          url
+        });
+      }
+    }
+
+    return new Response(JSON.stringify({ results }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
-};
+}
