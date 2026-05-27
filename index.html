@@ -3,290 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>百晓生 · 内部自用</title>
+    <title>百晓生 - 抖音文案提取工具</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
         body {
-            background: #fafafa;
-            background-image: radial-gradient(#e5e7eb 0.5px, transparent 0.5px);
-            background-size: 20px 20px;
-            color: #111;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
         }
         .glass-card {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(10px);
             border-radius: 16px;
-            border: 1px solid rgba(0,0,0,0.05);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
-            transition: all 0.2s ease;
-        }
-        .glass-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.06); }
-        .title-bxs {
-            font-size: clamp(3rem, 10vw, 5rem);
-            font-weight: 200;
-            letter-spacing: -0.05em;
-            line-height: 1;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         .btn-primary {
-            background: #111;
-            color: white;
-            border-radius: 8px;
-            padding: 12px 32px;
-            font-weight: 400;
-            letter-spacing: 0.03em;
-            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
         }
-        .btn-primary:hover { background: #333; transform: translateY(-1px); }
-        .btn-secondary {
-            background: transparent;
-            color: #111;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 12px 32px;
-            font-weight: 400;
-            letter-spacing: 0.03em;
-            transition: all 0.2s ease;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
-        .btn-secondary:hover { border-color: #111; background: #f5f5f5; }
-        .btn-small {
-            background: #f0f0f0;
-            color: #333;
-            border-radius: 6px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
         }
-        .btn-small:hover { background: #e0e0e0; }
-        .input-style {
-            background: #f5f5f7;
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
-        }
-        .input-style:focus { outline: none; background: #f0f0f2; }
-        .fade-in { animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="min-h-screen">
-<!-- 密码保护页 -->
-<div id="lockScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-white fade-in">
-    <div class="w-full max-w-sm px-6 text-center">
-        <div class="mb-12">
-            <div class="text-5xl font-light tracking-tight mb-4">百晓生</div>
-            <p class="text-gray-400 font-light text-sm">内部自用 · 请输入密码</p>
+<body class="py-12 px-4">
+    <div class="max-w-3xl mx-auto">
+        <!-- 标题 -->
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-light text-gray-800 mb-2">百晓生</h1>
+            <p class="text-gray-500">内部自用 · 每次最多处理10条链接</p>
         </div>
-        <input 
-            id="passwordInput" 
-            type="password" 
-            placeholder="输入密码" 
-            class="input-style w-full mb-6 text-center"
-        >
-        <button onclick="checkPassword()" class="btn-primary w-full">进入</button>
-    </div>
-</div>
 
-<!-- 主界面 -->
-<div id="mainApp" class="hidden max-w-2xl mx-auto px-4 py-16 fade-in">
-    <div class="text-center mb-16">
-        <div class="title-bxs text-black mb-4">百晓生</div>
-        <p class="text-gray-400 font-light text-sm tracking-wider">内部自用 · 每次最多处理10条链接</p>
-    </div>
-    <div class="glass-card p-6 mb-10">
-        <textarea 
-            id="contentInput" 
-            rows="5" 
-            class="input-style w-full resize-none"
-            placeholder="粘贴抖音分享内容或链接..."
-        ></textarea>
-    </div>
-    <div class="flex flex-wrap gap-3 justify-center mb-12">
-        <button onclick="startExtract()" class="btn-primary">提取文案</button>
-        <button onclick="copyAllResults()" class="btn-secondary">复制全部</button>
-        <button onclick="clearAll()" class="btn-secondary">清空</button>
-    </div>
-    <div id="progressArea" class="hidden glass-card p-4 mb-8 text-center">
-        <div class="flex items-center justify-center gap-3">
-            <div class="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-            <span id="progressText" class="text-gray-500 font-light text-sm">处理中...</span>
-        </div>
-    </div>
-    <div id="resultArea" class="space-y-4"></div>
-</div>
-
-<script>
-const CORRECT_PASSWORD = "BXS2206";
-const API_PROXY = "/extract"; // Cloudflare Pages 适配路径
-let currentUrls = [];
-
-// 密码验证
-function checkPassword() {
-    const inputPwd = document.getElementById('passwordInput').value.trim();
-    if (inputPwd === CORRECT_PASSWORD) {
-        document.getElementById('lockScreen').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-    } else {
-        alert('密码错误');
-    }
-}
-
-// 抖音链接正则
-const DOUYIN_REGEX = /https?:\/\/v\.douyin\.com\/[^\s]+/g;
-
-// 开始提取
-async function startExtract() {
-    const inputText = document.getElementById('contentInput').value.trim();
-    if (!inputText) return alert('请输入内容');
-
-    const urls = [...new Set(inputText.match(DOUYIN_REGEX) || [])];
-    if (urls.length === 0) return alert('未识别到有效链接');
-    if (urls.length > 10) return alert('每次最多处理10条链接，请减少数量');
-
-    currentUrls = urls;
-    document.getElementById('resultArea').innerHTML = '';
-    document.getElementById('progressArea').classList.remove('hidden');
-    document.getElementById('progressText').textContent = `正在处理 0/${urls.length}`;
-
-    for (let i = 0; i < urls.length; i++) {
-        const url = urls[i];
-        const resultDiv = createResultCard(i + 1, url, 'loading');
-        document.getElementById('resultArea').appendChild(resultDiv);
-
-        try {
-            document.getElementById('progressText').textContent = `正在处理 ${i+1}/${urls.length}`;
-            const text = await extractSingleVideo(url);
-            updateResultCard(resultDiv, text, 'success');
-        } catch (error) {
-            updateResultCard(resultDiv, `提取失败: ${error.message}`, 'error');
-        }
-    }
-
-    document.getElementById('progressArea').classList.add('hidden');
-}
-
-// 提取单条视频（适配Cloudflare）
-async function extractSingleVideo(url) {
-    // 提交任务（POST请求）
-    const submitRes = await fetch(API_PROXY, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: url })
-    });
-    const submitData = await submitRes.json();
-    if (submitData.code !== 200) throw new Error(submitData.msg);
-
-    const taskId = submitData.data;
-
-    // 轮询查询结果（GET请求）
-    for (let t = 0; t < 15; t++) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        const queryRes = await fetch(`${API_PROXY}?taskId=${taskId}`);
-        const queryData = await queryRes.json();
-
-        if (queryData.data?.status === 'SUCCESS') {
-            return queryData.data.textContent || '无文案内容';
-        } else if (queryData.data?.status === 'FAILURE') {
-            throw new Error(queryData.data.errorMessage);
-        }
-    }
-
-    throw new Error('任务超时');
-}
-
-// 创建结果卡片
-function createResultCard(index, url, status) {
-    const card = document.createElement('div');
-    card.className = 'glass-card p-5 fade-in';
-    card.id = `result-card-${index}`;
-    card.innerHTML = `
-        <div class="flex justify-between items-start mb-3">
-            <div class="font-light text-gray-500">文案 ${index}</div>
-            <div class="flex gap-2">
-                <button class="btn-small" onclick="copySingleResult(${index-1})">复制</button>
-                <button class="btn-small" onclick="retryExtract(${index-1})">重试</button>
+        <!-- 密码验证弹窗 -->
+        <div id="passwordModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="glass-card p-8 w-full max-w-md">
+                <h2 class="text-2xl font-medium text-gray-800 mb-6 text-center">请输入访问密码</h2>
+                <input 
+                    type="password" 
+                    id="passwordInput" 
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-4"
+                    placeholder="输入密码..."
+                    onkeypress="if(event.key === 'Enter') checkPassword()"
+                >
+                <button 
+                    onclick="checkPassword()" 
+                    class="w-full btn-primary text-white py-3 rounded-lg font-medium"
+                >
+                    进入
+                </button>
+                <p id="passwordError" class="text-red-500 text-center mt-3 hidden">密码错误，请重试</p>
             </div>
         </div>
-        <div id="card-content-${index}" class="text-gray-700 text-sm leading-relaxed">处理中...</div>
-    `;
-    return card;
-}
 
-// 更新结果卡片
-function updateResultCard(card, text, status) {
-    const contentDiv = card.querySelector('[id^="card-content-"]');
-    if (status === 'success') {
-        contentDiv.textContent = text;
-        contentDiv.className = 'text-gray-800 text-sm leading-relaxed';
-    } else if (status === 'error') {
-        contentDiv.textContent = text;
-        contentDiv.className = 'text-red-500 text-sm';
-    }
-}
+        <!-- 主内容 -->
+        <div id="mainContent" class="hidden">
+            <!-- 输入区域 -->
+            <div class="glass-card p-6 mb-6">
+                <textarea 
+                    id="urlInput" 
+                    class="w-full h-40 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none mb-4"
+                    placeholder="粘贴抖音分享内容或链接..."
+                ></textarea>
+                <div class="flex gap-3">
+                    <button 
+                        onclick="extractTexts()" 
+                        id="extractBtn"
+                        class="btn-primary text-white px-6 py-3 rounded-lg font-medium flex-1"
+                    >
+                        提取文案
+                    </button>
+                    <button 
+                        onclick="copyAll()" 
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
+                    >
+                        复制全部
+                    </button>
+                    <button 
+                        onclick="clearAll()" 
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium transition-colors"
+                    >
+                        清空
+                    </button>
+                </div>
+            </div>
 
-// 单条复制
-function copySingleResult(index) {
-    const contentDiv = document.getElementById(`card-content-${index+1}`);
-    const text = contentDiv.textContent;
-    if (text && text !== '处理中...' && !text.includes('失败')) {
-        navigator.clipboard.writeText(text).then(() => alert(`文案 ${index+1} 已复制`));
-    } else {
-        alert('该文案暂不可复制');
-    }
-}
+            <!-- 结果区域 -->
+            <div id="resultsContainer" class="space-y-4">
+                <!-- 结果卡片会在这里动态生成 -->
+            </div>
+        </div>
+    </div>
 
-// 重试单条提取
-async function retryExtract(index) {
-    const url = currentUrls[index];
-    if (!url) return;
+    <script>
+        // 密码验证
+        const CORRECT_PASSWORD = "BXS2206";
 
-    const card = document.getElementById(`result-card-${index+1}`);
-    const contentDiv = document.getElementById(`card-content-${index+1}`);
-    contentDiv.textContent = '重试中...';
-    contentDiv.className = 'text-gray-500 text-sm';
-
-    try {
-        const text = await extractSingleVideo(url);
-        updateResultCard(card, text, 'success');
-    } catch (error) {
-        updateResultCard(card, `重试失败: ${error.message}`, 'error');
-    }
-}
-
-// 复制全部结果
-function copyAllResults() {
-    const cards = document.querySelectorAll('[id^="card-content-"]');
-    let allText = '';
-    cards.forEach((card, i) => {
-        const text = card.textContent;
-        if (text && text !== '处理中...' && !text.includes('失败')) {
-            allText += `文案 ${i+1}:\n${text}\n\n`;
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === CORRECT_PASSWORD) {
+                document.getElementById('passwordModal').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+            } else {
+                document.getElementById('passwordError').classList.remove('hidden');
+                setTimeout(() => {
+                    document.getElementById('passwordError').classList.add('hidden');
+                }, 2000);
+            }
         }
-    });
 
-    if (allText) {
-        navigator.clipboard.writeText(allText).then(() => alert('已复制全部结果'));
-    } else {
-        alert('没有可复制的内容');
-    }
-}
+        // 修正后的链接提取函数（强制提取所有抖音链接）
+        function extractUrls(text) {
+            const douyinRegex = /https?:\/\/(v\.douyin\.com|www\.douyin\.com|iesdouyin\.com)\/[^\s]+/g;
+            const matches = text.match(douyinRegex);
+            return matches || [];
+        }
 
-// 清空所有
-function clearAll() {
-    document.getElementById('contentInput').value = '';
-    document.getElementById('resultArea').innerHTML = '';
-}
+        // 提取文案
+        async function extractTexts() {
+            const inputText = document.getElementById('urlInput').value;
+            const urls = extractUrls(inputText);
+            
+            if (urls.length === 0) {
+                alert("请输入内容");
+                return;
+            }
 
-// 回车提交密码
-document.getElementById('passwordInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') checkPassword();
-});
-</script>
+            if (urls.length > 10) {
+                alert("每次最多处理10条链接");
+                return;
+            }
+
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = '';
+
+            // 创建结果卡片
+            urls.forEach((url, index) => {
+                createResultCard(index, url, 'pending');
+            });
+
+            // 禁用提取按钮
+            const extractBtn = document.getElementById('extractBtn');
+            extractBtn.disabled = true;
+            extractBtn.textContent = '提取中...';
+
+            try {
+                const response = await fetch('/api/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ urls })
+                });
+
+                const data = await response.json();
+                
+                if (data.results) {
+                    data.results.forEach((result, index) => {
+                        updateResultCard(index, result);
+                    });
+                }
+            } catch (error) {
+                urls.forEach((url, index) => {
+                    updateResultCard(index, { success: false, error: error.message, url });
+                });
+            }
+
+            // 恢复提取按钮
+            extractBtn.disabled = false;
+            extractBtn.textContent = '提取文案';
+        }
+
+        // 创建结果卡片
+        function createResultCard(index, url, status) {
+            const card = document.createElement('div');
+            card.className = 'glass-card p-5 fade-in';
+            card.id = `result-card-${index}`;
+            
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="font-light text-gray-500">文案 ${index+1}</div>
+                    <div class="flex gap-2">
+                        <button class="btn-small" onclick="copySingleResult(${index})">复制</button>
+                        <button class="btn-small" onclick="retryExtract(${index})">重试</button>
+                    </div>
+                </div>
+                <div id="card-content-${index}" class="text-gray-700 text-sm leading-relaxed">处理中...</div>
+            `;
+            
+            document.getElementById('resultsContainer').appendChild(card);
+        }
+
+        // 更新结果卡片
+        function updateResultCard(index, result) {
+            const contentDiv = document.getElementById(`card-content-${index}`);
+            
+            if (result.success) {
+                contentDiv.textContent = result.text;
+                contentDiv.className = 'text-gray-700 text-sm leading-relaxed whitespace-pre-wrap';
+            } else {
+                contentDiv.innerHTML = `<span class="text-red-500">提取失败: ${result.error}</span>`;
+            }
+        }
+
+        // 复制单个结果
+        function copySingleResult(index) {
+            const content = document.getElementById(`card-content-${index}`).textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                alert("已复制到剪贴板");
+            });
+        }
+
+        // 重试单个提取
+        async function retryExtract(index) {
+            const inputText = document.getElementById('urlInput').value;
+            const urls = extractUrls(inputText);
+            const url = urls[index];
+            
+            const contentDiv = document.getElementById(`card-content-${index}`);
+            contentDiv.textContent = '重试中...';
+            
+            try {
+                const response = await fetch('/api/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ urls: [url] })
+                });
+
+                const data = await response.json();
+                
+                if (data.results && data.results[0]) {
+                    updateResultCard(index, data.results[0]);
+                }
+            } catch (error) {
+                updateResultCard(index, { success: false, error: error.message, url });
+            }
+        }
+
+        // 复制全部
+        function copyAll() {
+            const results = document.querySelectorAll('[id^="card-content-"]');
+            let allText = '';
+            
+            results.forEach((result, index) => {
+                if (result.textContent !== '处理中...') {
+                    allText += `【文案 ${index+1}】\n${result.textContent}\n\n`;
+                }
+            });
+            
+            if (allText) {
+                navigator.clipboard.writeText(allText.trim()).then(() => {
+                    alert("已复制全部文案");
+                });
+            }
+        }
+
+        // 清空
+        function clearAll() {
+            document.getElementById('urlInput').value = '';
+            document.getElementById('resultsContainer').innerHTML = '';
+        }
+
+        // 页面加载完成后聚焦密码输入框
+        window.onload = function() {
+            document.getElementById('passwordInput').focus();
+        }
+    </script>
 </body>
 </html>
